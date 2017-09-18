@@ -1,4 +1,5 @@
 const http = require('http');
+const net = require('net');
 const { parse: parseUrl } = require('url');
 
 const HTTP_PROXY_PORT = Number(process.argv[2]) || 8080;
@@ -19,6 +20,16 @@ proxyServer.on('request', (clientReq, clientRes) => {
         serverRes.pipe(clientRes);
     });
     clientReq.pipe(serverReq);
+});
+
+proxyServer.on('connect', (clientReq, clientSocket) => {
+    const serverUrl = parseUrl('https://' + clientReq.url);
+    const serverSocket = net.createConnection(serverUrl.port, serverUrl.hostname);
+    serverSocket.once('connect', () => {
+        clientSocket.write('HTTP/1.1 200 Connection established\r\n\r\n');
+        clientSocket.pipe(serverSocket);
+        serverSocket.pipe(clientSocket);
+    });
 });
 
 proxyServer.listen(HTTP_PROXY_PORT);
