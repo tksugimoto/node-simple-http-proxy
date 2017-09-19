@@ -1,6 +1,6 @@
 const http = require('http');
 const net = require('net');
-const { parse: parseUrl } = require('url');
+const parseUrl = require('url').parse;
 
 const HTTP_PROXY_PORT = Number(process.argv[2]) || 8080;
 
