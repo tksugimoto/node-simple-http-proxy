@@ -19,6 +19,16 @@ proxyServer.on('request', (clientReq, clientRes) => {
         clientRes.writeHead(serverRes.statusCode, serverRes.headers);
         serverRes.pipe(clientRes);
     });
+    serverReq.on('error', err => {
+        clientRes.writeHead(400, 'Bad Request');
+        clientRes.end(err.message);
+        console.warn({
+            type: 'serverReq.error',
+            time: new Date(),
+            url: clientReq.url,
+            err,
+        });
+    });
     clientReq.pipe(serverReq);
 });
 
