@@ -42,4 +42,6 @@ proxyServer.on('connect', (clientReq, clientSocket) => {
     });
 });
 
-proxyServer.listen(HTTP_PROXY_PORT);
+proxyServer.listen(HTTP_PROXY_PORT, () => {
+    console.info(`Proxy server started. (IP:port = 0.0.0.0:${HTTP_PROXY_PORT})`);
+});
