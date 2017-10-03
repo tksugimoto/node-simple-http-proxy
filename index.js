@@ -49,6 +49,15 @@ proxyServer.on('connect', (clientReq, clientSocket) => {
             err,
         });
     });
+    clientSocket.on('error', err => {
+        serverSocket.destroy();
+        console.warn({
+            type: 'clientSocket.error',
+            time: new Date(),
+            url: clientReq.url,
+            err,
+        });
+    });
 });
 
 proxyServer.listen(HTTP_PROXY_PORT, () => {
