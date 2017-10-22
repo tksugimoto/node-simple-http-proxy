@@ -15,7 +15,13 @@ const WarnLog = (clientReq) => (type, err) => {
 
 const proxyServer = http.createServer();
 
+proxyServer.on('connection', (...args) => {
+    console.log('connection');
+    // console.log(args);
+});
+
 proxyServer.on('request', (clientReq, clientRes) => {
+    console.log('request', clientReq.url);
     const url = parseUrl(clientReq.url);
     const serverReq = http.request({
         hostname : url.hostname,
@@ -38,8 +44,15 @@ proxyServer.on('request', (clientReq, clientRes) => {
 });
 
 proxyServer.on('connect', (clientReq, clientSocket) => {
+    console.log('connect', clientReq.url);
     const serverUrl = parseUrl('https://' + clientReq.url);
     const serverSocket = net.createConnection(serverUrl.port, serverUrl.hostname);
+    serverSocket.on('close', had_error  => {
+        console.warn('serverSocket close', had_error );
+    });
+    clientSocket.on('close', had_error  => {
+        console.warn('clientSocket close', had_error );
+    });
     serverSocket.once('connect', () => {
         clientSocket.write('HTTP/1.1 200 Connection established\r\n\r\n');
         clientSocket.pipe(serverSocket);
@@ -59,3 +72,11 @@ proxyServer.on('connect', (clientReq, clientSocket) => {
 proxyServer.listen(HTTP_PROXY_PORT, () => {
     console.info(`Proxy server started. (IP:port = 0.0.0.0:${HTTP_PROXY_PORT})`);
 });
+
+
+
+/*
+process.on('uncaughtException', (err) => {
+    console.log('uncaughtException', err);
+});
+//*/
