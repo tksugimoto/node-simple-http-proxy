@@ -2,7 +2,23 @@ const http = require('http');
 const net = require('net');
 const parseUrl = require('url').parse;
 
-const HTTP_PROXY_PORT = Number(process.argv[2]) || 8080;
+const parseLocalBindInfo = (arg) => {
+    if (!arg) return { port: 8080 };
+    if (/^\d+$/.test(arg)) return { port: Number(arg) };
+    const {
+        hostname,
+        port,
+    } = parseUrl(`http://${arg}`);
+    return {
+        hostname,
+        port: port || 8080,
+    };
+};
+
+const {
+    hostname: HTTP_PROXY_PORT_HOSTNAME,
+    port: HTTP_PROXY_PORT,
+ } = parseLocalBindInfo(process.argv[2]);
 
 const WarnLog = (clientReq) => (type, err) => {
     console.warn({
@@ -56,6 +72,6 @@ proxyServer.on('connect', (clientReq, clientSocket) => {
     });
 });
 
-proxyServer.listen(HTTP_PROXY_PORT, () => {
-    console.info(`Proxy server started. (IP:port = 0.0.0.0:${HTTP_PROXY_PORT})`);
+proxyServer.listen(HTTP_PROXY_PORT, HTTP_PROXY_PORT_HOSTNAME, () => {
+    console.info(`Proxy server started. (IP:port = ${HTTP_PROXY_PORT_HOSTNAME || '0.0.0.0'}:${HTTP_PROXY_PORT})`);
 });
